@@ -354,11 +354,12 @@ void loop() {
   delay(1000);
 
   // test
-  //  byte buf[20];                             // byte = uint8_t
-  //  float tmpNum = 16.11;
-  //  String tmp = String(tmpNum, (unsigned char)2);      // String(実数?, 桁数)
-  //  String str = "TEMP : -16.11";
-  //  str.getBytes(buf, sizeof(buf));           // String->byteに変換
+//    byte buf[20];                             // byte = uint8_t
+//    float tmpNum = 16.11;
+//    String tmp = String(tmpNum, (unsigned char)2);      // String(実数?, 桁数)
+//    String str = "TEMP : -16.11";
+//    str.getBytes(buf, sizeof(buf));           // String->byteに変換
+//    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
 
   //  int n = sprintf(buf, "%f", tmpNum);
 
@@ -375,50 +376,55 @@ void loop() {
   //uint8_t *p = (uint8_t*)&f;
   //for (int i = 0; i < sizeof(f); i++) printf("0x%02x ", p[i]);
 
-  //// https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
-  //  float f = 16.11;
-  //  float2bytes f2b;
-  //  f2b.f = f;
-  //  for (int i = 0; i < sizeof(buf); i++) {
-  //    if (i == 0) buf[i] = f2b.s[4];
-  //    if (i == 1) buf[i] = f2b.s[3];
-  //    if (i == 2) buf[i] = f2b.s[2];
-  //    if (i == 3) buf[i] = f2b.s[1];
-  //    if (i == 4) buf[i] = f2b.s[0];
-  //    if (i == 5) buf[i] = 0x00;
-  //    if (i == 6) buf[i] = 0x01;
-  //  }
-  //  Serial.println(f2b.f);
-  //  Serial.print(f2b.s[0]);
-  //  Serial.print(f2b.s[1]);
-  //  Serial.print(f2b.s[2]);
-  //  Serial.print(f2b.s[3]);
-  //  Serial.println(f2b.s[4]);
-  //  Serial.println(buf[0]);
+//  // https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
+    byte buf[20];                             // byte = uint8_t
+//    float f = 16.11;
+//    float2bytes f2b;
+//    f2b.f = f;
+//    for (int i = 0; i < sizeof(buf); i++) {
+//      if (i == 0) buf[i] = f2b.s[4];
+//      if (i == 1) buf[i] = f2b.s[3];
+//      if (i == 2) buf[i] = f2b.s[2];
+//      if (i == 3) buf[i] = f2b.s[1];
+//      if (i == 4) buf[i] = f2b.s[0];
+//      if (i == 5) buf[i] = 0x00;
+//      if (i == 6) buf[i] = 0x01;
+//    }
+//    Serial.println(f2b.f);
+//    Serial.print(f2b.s[0]);
+//    Serial.print(f2b.s[1]);
+//    Serial.print(f2b.s[2]);
+//    Serial.print(f2b.s[3]);
+//    Serial.println(f2b.s[4]);
+//    Serial.println(buf[0]);
+//    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
 
-  // http://bradsduino.blogspot.jp/2012/11/converting-float-to-array-of-byte-s.html
-  float x = -16.11;
-  byte* b = (byte*) &x; // 4 byte little endianで格納される
-  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)b, sizeof(b));  // 19だとOK、20だと表示間隔が増える
+// 10/12に試してたやつ
+//  // http://bradsduino.blogspot.jp/2012/11/converting-float-to-array-of-byte-s.html
+//  float x = -16.11;
+//  byte* b = (byte*) &x; // 4 byte little endianで格納される
+//  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)b, sizeof(b));  // 19だとOK、20だと表示間隔が増える
 
-  //  for (int i = 0; i < sizeof(buf); i++) {
-  //    if (i == 0) buf[i] = byte('T');
-  //    if (i == 1) buf[i] = byte('E');
-  //    if (i == 2) buf[i] = byte('M');
-  //    if (i == 3) buf[i] = byte('P');
-  //    if (i == 4) buf[i] = byte(' ');
-  //    if (i == 5) buf[i] = byte(':');
-  //    if (i == 6) buf[i] = byte(' ');
-  //    if (i == 7) buf[i] = byte('-');
-  //    if (i == 8) buf[i] = byte('1');
-  //    if (i == 9) buf[i] = byte('6');
-  //    if (i == 10) buf[i] = byte('.');
-  //    if (i == 11) buf[i] = byte('1');
-  //    if (i == 12) buf[i] = byte('1');
-  //    if (i == 13) buf[i] = 0x00;
-  //    if (i == 14) buf[i] = 0x01;
-  ////    else buf[i] = 0x00;
-  //  }
+    for (int i = 0; i < sizeof(buf); i++) {
+      if (i == 0) buf[i] = byte('T');
+      if (i == 1) buf[i] = byte('E');
+      if (i == 2) buf[i] = byte('M');
+      if (i == 3) buf[i] = byte('P');
+      if (i == 4) buf[i] = byte(' ');
+      if (i == 5) buf[i] = byte(':');
+      if (i == 6) buf[i] = byte(' ');
+      if (i == 7) buf[i] = byte('-');
+      if (i == 8) buf[i] = byte('1');
+      if (i == 9) buf[i] = byte('6');
+      if (i == 10) buf[i] = byte('.');
+      if (i == 11) buf[i] = byte('1');
+      if (i == 12) buf[i] = byte('1');
+      if (i == 13) buf[i] = 0x00;
+      if (i == 14) buf[i] = 0x01;
+  //    else buf[i] = 0x00;
+    }
+    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
+
 
 //  char buf[20];
 //  float x = -16.11;
