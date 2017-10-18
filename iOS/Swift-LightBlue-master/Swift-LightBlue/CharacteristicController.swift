@@ -230,89 +230,18 @@ class CharacteristicController : UIViewController, UITableViewDelegate, UITableV
         formatter.dateFormat = "HH:mm:ss.SSS"
         let timeStr = formatter.string(from: Date())
         if characteristic.value != nil && characteristic.value!.count != 0 {
-//            let data = characteristic.value!
             var data = characteristic.value!
             print(data)
-            
-            let unicodeString = String(data: characteristic.value!, encoding: String.Encoding.utf8)
-            print(unicodeString)
-            
-//            let str00 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.ascii.rawValue)
-//            print(str00)
-//            let str01 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf8.rawValue)
-//            print(str01)
-//            let str02 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16.rawValue)
-//            print(str02)
-//            let str03 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16BigEndian.rawValue)
-//            print(str03)
-//            let str04 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16LittleEndian.rawValue)
-//            print(str04)
-//            let str05 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32.rawValue)
-//            print(str05)
-//            let str06 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32BigEndian.rawValue)
-//            print(str06)
-//            let str07 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32LittleEndian.rawValue)
-//            print(str07)
-//
-//            let str08 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.unicode.rawValue)
-//            print(str08)
+            print(data[0])
+            print(data[1])
+            print(data[2])
+            print(data[3])
 
-            
-//            print(data)
-//            print(data[0])
-//            print(data[1])
-//            print(data[2])
-//            print(data[3])
-            // test
-            var byte0:UInt8 = 0
-            var byte1:UInt8 = 0
-            var byte2:UInt8 = 0
-            var byte3:UInt8 = 0
-//            data.copyBytes(to: &byte0, count:1)
-            data.copyBytes(to: &byte0, from:0..<1)
-            data.copyBytes(to: &byte1, from:1..<2)
-            data.copyBytes(to: &byte2, from:2..<3)
-            data.copyBytes(to: &byte3, from:3..<4)
+            // 参考：ByteをUInt8に変換(https://stackoverflow.com/questions/32769929/convert-bytes-uint8-array-to-int-in-swift)
+            let value = UInt32(bigEndian: data.withUnsafeBytes { $0.pointee })  // 20バイトのデータをUInt32に変換
+            let signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
+            print(Double(signedValue)/100)                                              // UInt32->Doubleに型変換後に100で割って温度[degC]表示
 
-//            var byte:UInt8 = 0
-//            data.copyBytes(to: &byte, count:1)
-
-//            let valueInInt0 = Int(byte0)
-//            let valueInInt1 = Int(byte1)
-//            let valueInInt2 = Int(byte2)
-//            let valueInInt3 = Int(byte3)
-
-            data[3] = UInt8(byte0)
-            data[2] = UInt8(byte1)
-            data[1] = UInt8(byte2)
-            data[0] = UInt8(byte3)
-
-//            print(data[0])
-//            print(data[1])
-//            print(data[2])
-//            print(data[3])
-            
-//            let str = NSString(bytes: &data, length: data.count, encoding: String.Encoding.ascii.rawValue)
-//            let str10 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.ascii.rawValue)
-//            print(str10)
-//            let str11 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf8.rawValue)
-//            print(str11)
-//            let str12 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16.rawValue)
-//            print(str12)
-//            let str13 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16BigEndian.rawValue)
-//            print(str13)
-//            let str14 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf16LittleEndian.rawValue)
-//            print(str14)
-//            let str15 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32.rawValue)
-//            print(str15)
-//            let str16 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32BigEndian.rawValue)
-//            print(str16)
-//            let str17 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.utf32LittleEndian.rawValue)
-//            print(str17)
-//
-//            let str18 = NSString(bytes: &data, length: data.count, encoding: String.Encoding.unicode.rawValue)
-//            print(str18)
-            
             let rangeOfData = (data.description.characters.index(data.description.startIndex, offsetBy: 1) ..< data.description.characters.index(before: data.description.endIndex))
             timeAndValues[timeStr] = "0x" + data.description.substring(with: rangeOfData)
         } else {

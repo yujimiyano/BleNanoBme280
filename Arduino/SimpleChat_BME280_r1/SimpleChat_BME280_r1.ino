@@ -1,23 +1,8 @@
 // 2017.10.11 notifyで1秒毎に送信
+// 2017.10.18 stringで送信する方法にしてテスト
 
-/*
-   Copyright (c) 2016 RedBear
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-   to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-   and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-   IN THE SOFTWARE.
-*/
 #include <BLE_API.h>
 #include <Wire.h>
-//#include<stdlib.h>  // for dtostrf
-//#include<avr/dtostrf.h> // for dtostrf
 
 #define DEVICE_NAME     "BLE_Peripheral"
 #define TXRX_BUF_LEN    20
@@ -55,17 +40,6 @@ GattCharacteristic  characteristic2(
 GattCharacteristic *uartChars[] = {&characteristic1, &characteristic2};
 GattService         uartService(service1_uuid, uartChars, sizeof(uartChars) / sizeof(GattCharacteristic *));
 
-///* Health Thermometer Service */
-//uint8_t thermTempPayload[5] = { 0, 0, 0, 0, 0 };
-//GattCharacteristic tempChar (GattCharacteristic::UUID_TEMPERATURE_MEASUREMENT_CHAR,
-//                             thermTempPayload, 5, 5,
-//                             GattCharacteristic::BLE_GATT_CHAR_PROPERTIES_INDICATE);
-//GattCharacteristic *htmChars[] = {&tempChar, };
-//GattService htmService(service1_uuid, htmChars,
-//                       sizeof(uartChars) / sizeof(GattCharacteristic *));
-////GattService htmService(GattService::UUID_HEALTH_THERMOMETER_SERVICE, htmChars,
-////                       sizeof(htmChars) / sizeof(GattCharacteristic *));
-
 // Variables for BME280
 unsigned long int hum_raw, temp_raw, pres_raw;
 signed long int   t_fine;
@@ -87,12 +61,6 @@ int8_t  dig_H3;
 int16_t dig_H4;
 int16_t dig_H5;
 int8_t  dig_H6;
-
-// union
-union float2bytes {
-  float f;
-  byte s[sizeof(float)];
-};
 
 // functions for BLE
 void disconnectionCallBack(const Gap::DisconnectionCallbackParams_t *params) {
@@ -218,7 +186,6 @@ void writeReg(uint8_t reg_address, uint8_t data)
   Wire.write(data);
   Wire.endTransmission();
 }
-
 
 void readData()
 {
@@ -352,169 +319,60 @@ void loop() {
   Serial.println(" %");
 
   delay(1000);
+  // https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
+  byte buf[20];                             // byte = uint8_t
+  //  byte *buf1[20];
 
-  // test
-//    byte buf[20];                             // byte = uint8_t
-//    float tmpNum = 16.11;
-//    String tmp = String(tmpNum, (unsigned char)2);      // String(実数?, 桁数)
-//    String str = "TEMP : -16.11";
-//    str.getBytes(buf, sizeof(buf));           // String->byteに変換
-//    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
+  // 10/12に試してたやつ
+  //  // http://bradsduino.blogspot.jp/2012/11/converting-float-to-array-of-byte-s.html
+  float x = -16.11;
+  //  byte* b = (byte*) &x; // 4 byte little endianで格納される
+  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)b, sizeof(b));  // 19だとOK、20だと表示間隔が増える
 
-  //  int n = sprintf(buf, "%f", tmpNum);
+  for (int i = 0; i < sizeof(buf); i++) {
+    if (i == 0) buf[i] = byte('T');
+    if (i == 1) buf[i] = byte('E');
+    if (i == 2) buf[i] = byte('M');
+    if (i == 3) buf[i] = byte('P');
+    if (i == 4) buf[i] = byte(' ');
+    if (i == 5) buf[i] = byte(':');
+    if (i == 6) buf[i] = byte(' ');
+    if (i == 7) buf[i] = byte('-');
+    if (i == 8) buf[i] = byte('1');
+    if (i == 9) buf[i] = byte('6');
+    if (i == 10) buf[i] = byte('.');
+    if (i == 11) buf[i] = byte('1');
+    if (i == 12) buf[i] = byte('1');
+    if (i == 13) buf[i] = 0x00;
+    if (i == 14) buf[i] = 0x01;
+    //    else buf[i] = 0x00;
+  }
 
-  //  sprintf(buf,"%f", 16.11); // errorが出る invalid conversion from 'byte* {aka unsigned char*}' to 'char*' [-fpermissive]
-  //  *((float *)buf) = tmpNum; // http://forum.arduino.cc/index.php?topic=180456.0 // nullになる
+  // doubleをStringにする
+  //  dtostrf(x, 5, 2, buf);  // error 'dtostrf' was not declared in this scope
 
-  //  buf[0] = (float)((tmpNum >> 24) & 0xFF) ; // errorが出る invalid operands of types 'float' and 'int' to binary 'operator>>'
-  //  buf[1] = (float)((tmpNum >> 16) & 0xFF) ;
-  //  buf[2] = (float)((tmpNum >> 8) & 0XFF);
-  //  buf[3] = (float)((tmpNum & 0XFF));
+//  // sprintfを使う方法->上手く行かなかった
+//  char *c;
+//  sprintf(c, "%5.2lf", x); // コンパイル通る
+//  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)c, sizeof(c));  // swift側でエラーが出る
 
-  //// https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
-  //float f = 1;  // null -> 4 byte little endianで格納される
-  //uint8_t *p = (uint8_t*)&f;
-  //for (int i = 0; i < sizeof(f); i++) printf("0x%02x ", p[i]);
+  // http://forum.arduino.cc/index.php?topic=180456.0
+  // 整数をビットシフトして格納->Hexでは見れている
+  signed long int longInt = -1611;  // 1611 -> 0x0000064B, -1611 -> 0xFFFFF9B5
+  byte byteArray[20] = {0x00};
+  byteArray[0] = (int)((longInt >> 24) & 0xFF) ;
+  byteArray[1] = (int)((longInt >> 16) & 0xFF) ;
+  byteArray[2] = (int)((longInt >> 8) & 0xFF);
+  byteArray[3] = (int)((longInt & 0xFF));
+//  for(int i = 4; i < sizeof(byteArray); i++){
+//    byteArray[i] = 0x00;
+//  }
+  byteArray[3] = (int)((longInt & 0XFF));
+  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る
 
-//  // https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
-    byte buf[20];                             // byte = uint8_t
-//    float f = 16.11;
-//    float2bytes f2b;
-//    f2b.f = f;
-//    for (int i = 0; i < sizeof(buf); i++) {
-//      if (i == 0) buf[i] = f2b.s[4];
-//      if (i == 1) buf[i] = f2b.s[3];
-//      if (i == 2) buf[i] = f2b.s[2];
-//      if (i == 3) buf[i] = f2b.s[1];
-//      if (i == 4) buf[i] = f2b.s[0];
-//      if (i == 5) buf[i] = 0x00;
-//      if (i == 6) buf[i] = 0x01;
-//    }
-//    Serial.println(f2b.f);
-//    Serial.print(f2b.s[0]);
-//    Serial.print(f2b.s[1]);
-//    Serial.print(f2b.s[2]);
-//    Serial.print(f2b.s[3]);
-//    Serial.println(f2b.s[4]);
-//    Serial.println(buf[0]);
-//    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
-
-// 10/12に試してたやつ
-//  // http://bradsduino.blogspot.jp/2012/11/converting-float-to-array-of-byte-s.html
-//  float x = -16.11;
-//  byte* b = (byte*) &x; // 4 byte little endianで格納される
-//  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)b, sizeof(b));  // 19だとOK、20だと表示間隔が増える
-
-    for (int i = 0; i < sizeof(buf); i++) {
-      if (i == 0) buf[i] = byte('T');
-      if (i == 1) buf[i] = byte('E');
-      if (i == 2) buf[i] = byte('M');
-      if (i == 3) buf[i] = byte('P');
-      if (i == 4) buf[i] = byte(' ');
-      if (i == 5) buf[i] = byte(':');
-      if (i == 6) buf[i] = byte(' ');
-      if (i == 7) buf[i] = byte('-');
-      if (i == 8) buf[i] = byte('1');
-      if (i == 9) buf[i] = byte('6');
-      if (i == 10) buf[i] = byte('.');
-      if (i == 11) buf[i] = byte('1');
-      if (i == 12) buf[i] = byte('1');
-      if (i == 13) buf[i] = 0x00;
-      if (i == 14) buf[i] = 0x01;
-  //    else buf[i] = 0x00;
-    }
-    ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
-
-
-//  char buf[20];
-//  float x = -16.11;
-//  //  (byte *)buf = tempToAscii(x);
-//  //  tempToAscii(x, buf);
-//  sprintf(buf, "%f", x);
-//  //  dtostrf(x, sizeof(x), 2, buf);
-
-//  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
-
-  //  uint32_t temp_ieee11073 = quick_ieee11073_from_float(11.1);
-  //  memcpy(thermTempPayload+1, &temp_ieee11073, 4);
-  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), thermTempPayload, sizeof(thermTempPayload)); //getHandle->getValueAttribute
-  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (uint8_t *)&temp_ieee11073, sizeof(temp_ieee11073)); //getHandle->getValueAttribute
+  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
 
   ble.waitForEvent();
 }
 
-//// https://playground.arduino.cc/Main/TempToAscii
-//byte* tempToAscii(double temp)
-//{
-////  char ascii[32];
-//  byte ascii[32];
-//  int frac;
-//  frac=(unsigned int)(temp*1000)%1000;  //get three numbers to the right of the deciaml point
-//
-//  itoa((int)temp,ascii,10);
-//  strcat(ascii,".");
-//  itoa(frac,&ascii[strlen(ascii)],10); //put the frac after the deciaml
-//
-//  return ascii;
-//}
 
-//// http://blog.automated.it/tag/arduino/
-////void tempToAscii(double temp, char *buff) {
-//void tempToAscii(double temp, byte *buff) {
-//  int frac;
-//  //get three numbers to the right of the decimal point
-//  frac = (unsigned int)(temp * 1000) % 1000;
-////  itoa((int)temp,buff,10);
-//  itoa((int)temp, buff);
-//
-////  strcat(buff, ".");
-//  my_strcat(buff, ".");
-//  //put the frac after the decimal
-//  itoa(frac, &buff[strlen(buff)]);
-//}
-
-//// https://os.mbed.com/forum/bugs-suggestions/topic/2319/
-///* itoa:  convert n to characters in s */
-//// void itoa(int n, char s[])
-//void itoa(int n, char s[])
-//{
-//  int i, sign;
-//
-//  if ((sign = n) < 0)  /* record sign */
-//    n = -n;          /* make n positive */
-//  i = 0;
-//  do {       /* generate digits in reverse order */
-//    s[i++] = n % 10 + '0';   /* get next digit */
-//  } while ((n /= 10) > 0);     /* delete it */
-//  if (sign < 0)
-//    s[i++] = '-';
-//  s[i] = '\0';
-//  reverse(s);
-//}
-//
-//// http://wktcoder.blogspot.jp/2012/07/cstrcat.html
-//// str1の後ろにstr2を連結する
-//byte * my_strcat(byte* str1, const char* str2){
-//    byte *top;
-//
-//    // (1) 返り値用に先頭アドレスを保持しておく
-//    top=str1;
-//
-//    // (2) str1のポインタを最後まで進める
-//    while(*str1++ != '¥0');
-//    *str1--;
-//
-//    // (3)str1の背後から、str2の文字をコピーしていく
-//    while( (*str1++ = *str2++) != '¥0');
-//
-//    return top;
-//}
-
-// https://forum.arduino.cc/index.php?topic=170564.0
-// https://github.com/arduino/Arduino/blob/a2e7413d229812ff123cb8864747558b270498f1/hardware/arduino/sam/cores/arduino/avr/dtostrf.c
-char *dtostrf (double val, signed char width, unsigned char prec, char *sout) {
-  char fmt[20];
-  sprintf(fmt, "%%%d.%df", width, prec);
-  sprintf(sout, fmt, val);
-  return sout;
-}
