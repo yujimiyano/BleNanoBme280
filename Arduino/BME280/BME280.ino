@@ -1,5 +1,13 @@
-// 2017.10.11 notifyで1秒毎に送信
-// 2017.10.18 stringで送信する方法にしてテスト
+/*
+   BME280.ino
+   Created by Yuji Miyano on 2017/10/20
+   description  : Pressure sensing with piezo.
+   Use hardware : BLE Nano
+   Use library  : BLE_API.h, Wire.h
+   Reference    : BLE program based on    https://github.com/RedBearLab/nRF51822-Arduino/blob/S130/arduino-1.6.x/hardware/RBL/RBL_nRF51822/libraries/BLE_Examples/examples/SimpleChat/SimpleChat.ino
+                  BME280 program based on https://github.com/SWITCHSCIENCE/BME280/blob/master/Arduino/BME280_I2C/BME280_I2C.ino
+                  Float to series of bytes program based on http://forum.arduino.cc/index.php?topic=180456.0         
+*/
 
 #include <BLE_API.h>
 #include <Wire.h>
@@ -44,23 +52,23 @@ GattService         uartService(service1_uuid, uartChars, sizeof(uartChars) / si
 unsigned long int hum_raw, temp_raw, pres_raw;
 signed long int   t_fine;
 uint16_t dig_T1;
-int16_t dig_T2;
-int16_t dig_T3;
+ int16_t dig_T2;
+ int16_t dig_T3;
 uint16_t dig_P1;
-int16_t dig_P2;
-int16_t dig_P3;
-int16_t dig_P4;
-int16_t dig_P5;
-int16_t dig_P6;
-int16_t dig_P7;
-int16_t dig_P8;
-int16_t dig_P9;
-int8_t  dig_H1;
-int16_t dig_H2;
-int8_t  dig_H3;
-int16_t dig_H4;
-int16_t dig_H5;
-int8_t  dig_H6;
+ int16_t dig_P2;
+ int16_t dig_P3;
+ int16_t dig_P4;
+ int16_t dig_P5;
+ int16_t dig_P6;
+ int16_t dig_P7;
+ int16_t dig_P8;
+ int16_t dig_P9;
+ int8_t  dig_H1;
+ int16_t dig_H2;
+ int8_t  dig_H3;
+ int16_t dig_H4;
+ int16_t dig_H5;
+ int8_t  dig_H6;
 
 // functions for BLE
 void disconnectionCallBack(const Gap::DisconnectionCallbackParams_t *params) {
@@ -262,7 +270,6 @@ unsigned long int calibration_H(signed long int adc_H)
 }
 
 void setup() {
-  // put your setup code here, to run once
   Serial.begin(9600);
   Serial.attach(uart_handle); // 割り込み処理
 
@@ -319,49 +326,13 @@ void loop() {
   Serial.println(" %");
 
   delay(1000);
-  // https://os.mbed.com/forum/helloworld/topic/2053/?page=1#comment-53016
-  byte buf[20];                             // byte = uint8_t
-  //  byte *buf1[20];
 
-  // 10/12に試してたやつ
-  //  // http://bradsduino.blogspot.jp/2012/11/converting-float-to-array-of-byte-s.html
-  float x = -16.11;
-  //  byte* b = (byte*) &x; // 4 byte little endianで格納される
-  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)b, sizeof(b));  // 19だとOK、20だと表示間隔が増える
-
-  for (int i = 0; i < sizeof(buf); i++) {
-    if (i == 0) buf[i] = byte('T');
-    if (i == 1) buf[i] = byte('E');
-    if (i == 2) buf[i] = byte('M');
-    if (i == 3) buf[i] = byte('P');
-    if (i == 4) buf[i] = byte(' ');
-    if (i == 5) buf[i] = byte(':');
-    if (i == 6) buf[i] = byte(' ');
-    if (i == 7) buf[i] = byte('-');
-    if (i == 8) buf[i] = byte('1');
-    if (i == 9) buf[i] = byte('6');
-    if (i == 10) buf[i] = byte('.');
-    if (i == 11) buf[i] = byte('1');
-    if (i == 12) buf[i] = byte('1');
-    if (i == 13) buf[i] = 0x00;
-    if (i == 14) buf[i] = 0x01;
-    //    else buf[i] = 0x00;
-  }
-
-  // doubleをStringにする
-  //  dtostrf(x, 5, 2, buf);  // error 'dtostrf' was not declared in this scope
-
-  //  // sprintfを使う方法->上手く行かなかった
-  //  char *c;
-  //  sprintf(c, "%5.2lf", x); // コンパイル通る
-  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)c, sizeof(c));  // swift側でエラーが出る
-
-  // http://forum.arduino.cc/index.php?topic=180456.0
-  // 整数をビットシフトして格納->Hexでは見れている
   signed long int tempData  = -1611;  // 1611   -> 0x0000064B, -1611 -> 0xFFFFF9B5
   signed long int pressData = 101325; // 101325 -> 0x00018BCD
   signed long int humData   = 4321;   // 4321   -> 0x000010E1
-  byte byteArray[20] = {0x00};
+  
+  byte byteArray[20] = {0x00};        // byte = uint8_t
+  
   byteArray[0]  = (int)((tempData  >> 24) & 0xFF);
   byteArray[1]  = (int)((tempData  >> 16) & 0xFF);
   byteArray[2]  = (int)((tempData  >>  8) & 0xFF);
@@ -374,14 +345,8 @@ void loop() {
   byteArray[9]  = (int)((humData   >> 16) & 0xFF);
   byteArray[10] = (int)((humData  >>  8)  & 0xFF);
   byteArray[11] = (int)( humData          & 0xFF);
-  //  for(int i = 4; i < sizeof(byteArray); i++){
-  //    byteArray[i] = 0x00;
-  //  }
-  //  byteArray[3] = (int)((longInt & 0XFF));
-  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る
 
-  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
-
+  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る。
   ble.waitForEvent();
 }
 

@@ -237,7 +237,7 @@ class CharacteristicController : UIViewController, UITableViewDelegate, UITableV
             print(data[2])
             print(data[3])
 
-            // 参考：ByteをUInt8に変換(https://stackoverflow.com/questions/32769929/convert-bytes-uint8-array-to-int-in-swift)
+            // 参考: ByteをUInt8に変換(https://stackoverflow.com/questions/32769929/convert-bytes-uint8-array-to-int-in-swift)
             var value = UInt32(bigEndian: data.withUnsafeBytes { $0.pointee })  // 20バイトのデータをUInt32に変換
             var signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
             print(Double(signedValue)/100)                                      // UInt32->Doubleに型変換後に100で割って温度[degC]表示
@@ -247,7 +247,8 @@ class CharacteristicController : UIViewController, UITableViewDelegate, UITableV
             print(data[6])
             print(data[7])
             
-            // 参考：SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
+            // 参考: SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
+            // 参考: assumingMemoryBoundの使い方(https://stackoverflow.com/questions/38983277/how-to-get-bytes-out-of-an-unsafemutablerawpointer)
             value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 4).assumingMemoryBound(to: UInt32.self).pointee })  // 20バイトのデータの4バイト目からUInt32に変換
             signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
             print(Double(signedValue)/100)                                  // UInt32->Doubleに型変換後に100で割って気圧[hPa]表示
@@ -257,7 +258,8 @@ class CharacteristicController : UIViewController, UITableViewDelegate, UITableV
             print(data[10])
             print(data[11])
             
-            // 参考：SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
+            // 参考: SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
+            // 参考: assumingMemoryBoundの使い方(https://stackoverflow.com/questions/38983277/how-to-get-bytes-out-of-an-unsafemutablerawpointer)
             value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 8).assumingMemoryBound(to: UInt32.self).pointee })  // 20バイトのデータの8バイト目からUInt32に変換
             signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
             print(Double(signedValue)/100)                                  // UInt32->Doubleに型変換後に100で割って湿度[%]表示
