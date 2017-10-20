@@ -351,23 +351,33 @@ void loop() {
   // doubleをStringにする
   //  dtostrf(x, 5, 2, buf);  // error 'dtostrf' was not declared in this scope
 
-//  // sprintfを使う方法->上手く行かなかった
-//  char *c;
-//  sprintf(c, "%5.2lf", x); // コンパイル通る
-//  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)c, sizeof(c));  // swift側でエラーが出る
+  //  // sprintfを使う方法->上手く行かなかった
+  //  char *c;
+  //  sprintf(c, "%5.2lf", x); // コンパイル通る
+  //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)c, sizeof(c));  // swift側でエラーが出る
 
   // http://forum.arduino.cc/index.php?topic=180456.0
   // 整数をビットシフトして格納->Hexでは見れている
-  signed long int longInt = -1611;  // 1611 -> 0x0000064B, -1611 -> 0xFFFFF9B5
+  signed long int tempData  = -1611;  // 1611   -> 0x0000064B, -1611 -> 0xFFFFF9B5
+  signed long int pressData = 101325; // 101325 -> 0x00018BCD
+  signed long int humData   = 4321;   // 4321   -> 0x000010E1
   byte byteArray[20] = {0x00};
-  byteArray[0] = (int)((longInt >> 24) & 0xFF) ;
-  byteArray[1] = (int)((longInt >> 16) & 0xFF) ;
-  byteArray[2] = (int)((longInt >> 8) & 0xFF);
-  byteArray[3] = (int)((longInt & 0xFF));
-//  for(int i = 4; i < sizeof(byteArray); i++){
-//    byteArray[i] = 0x00;
-//  }
-  byteArray[3] = (int)((longInt & 0XFF));
+  byteArray[0]  = (int)((tempData  >> 24) & 0xFF);
+  byteArray[1]  = (int)((tempData  >> 16) & 0xFF);
+  byteArray[2]  = (int)((tempData  >>  8) & 0xFF);
+  byteArray[3]  = (int)( tempData         & 0xFF);
+  byteArray[4]  = (int)((pressData >> 24) & 0xFF);
+  byteArray[5]  = (int)((pressData >> 16) & 0xFF);
+  byteArray[6]  = (int)((pressData >>  8) & 0xFF);
+  byteArray[7]  = (int)( pressData        & 0xFF);
+  byteArray[8]  = (int)((humData   >> 24) & 0xFF);
+  byteArray[9]  = (int)((humData   >> 16) & 0xFF);
+  byteArray[10] = (int)((humData  >>  8)  & 0xFF);
+  byteArray[11] = (int)( humData          & 0xFF);
+  //  for(int i = 4; i < sizeof(byteArray); i++){
+  //    byteArray[i] = 0x00;
+  //  }
+  //  byteArray[3] = (int)((longInt & 0XFF));
   ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る
 
   //  ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)buf, sizeof(buf));  // 19だとOK、20だと表示間隔が増える
