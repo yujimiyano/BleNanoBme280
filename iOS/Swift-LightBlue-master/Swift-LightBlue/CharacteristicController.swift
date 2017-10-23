@@ -231,38 +231,26 @@ class CharacteristicController : UIViewController, UITableViewDelegate, UITableV
         let timeStr = formatter.string(from: Date())
         if characteristic.value != nil && characteristic.value!.count != 0 {
             var data = characteristic.value!
-            print(data)
-            print(data[0])
-            print(data[1])
-            print(data[2])
-            print(data[3])
 
+            // 温度
             // 参考: ByteをUInt8に変換(https://stackoverflow.com/questions/32769929/convert-bytes-uint8-array-to-int-in-swift)
             var value = UInt32(bigEndian: data.withUnsafeBytes { $0.pointee })  // 20バイトのデータをUInt32に変換
             var signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
             print(Double(signedValue)/100)                                      // UInt32->Doubleに型変換後に100で割って温度[degC]表示
-
-            print(data[4])
-            print(data[5])
-            print(data[6])
-            print(data[7])
             
+            // 気圧
             // 参考: SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
             // 参考: assumingMemoryBoundの使い方(https://stackoverflow.com/questions/38983277/how-to-get-bytes-out-of-an-unsafemutablerawpointer)
-            value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 4).assumingMemoryBound(to: UInt32.self).pointee })  // 20バイトのデータの4バイト目からUInt32に変換
+            value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 4).assumingMemoryBound(to: UInt32.self).pointee })           // 20バイトのデータの4バイト目からUInt32に変換
             signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
             print(Double(signedValue)/100)                                  // UInt32->Doubleに型変換後に100で割って気圧[hPa]表示
             
-            print(data[8])
-            print(data[9])
-            print(data[10])
-            print(data[11])
-            
+            // 湿度
             // 参考: SwiftのData内の任意の位置から数値を取り出す(https://qiita.com/ShujiFukumoto/items/523597308912b73226eb)
             // 参考: assumingMemoryBoundの使い方(https://stackoverflow.com/questions/38983277/how-to-get-bytes-out-of-an-unsafemutablerawpointer)
-            value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 8).assumingMemoryBound(to: UInt32.self).pointee })  // 20バイトのデータの8バイト目からUInt32に変換
+            value = UInt32(bigEndian: data.withUnsafeBytes { UnsafeRawPointer($0).advanced(by: 8).assumingMemoryBound(to: UInt32.self).pointee })           // 20バイトのデータの8バイト目からUInt32に変換
             signedValue = Int32(bitPattern: UInt32(value))                  // UInt32(符号なし)をInt32(符号あり)に変換
-            print(Double(signedValue)/100)                                  // UInt32->Doubleに型変換後に100で割って湿度[%]表示
+            print(Double(signedValue)/1024)                                  // UInt32->Doubleに型変換後に1024で割って湿度[%]表示
             
             let rangeOfData = (data.description.characters.index(data.description.startIndex, offsetBy: 1) ..< data.description.characters.index(before: data.description.endIndex))
             timeAndValues[timeStr] = "0x" + data.description.substring(with: rangeOfData)

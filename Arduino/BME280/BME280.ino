@@ -6,7 +6,8 @@
    Use library  : BLE_API.h, Wire.h
    Reference    : BLE program based on    https://github.com/RedBearLab/nRF51822-Arduino/blob/S130/arduino-1.6.x/hardware/RBL/RBL_nRF51822/libraries/BLE_Examples/examples/SimpleChat/SimpleChat.ino
                   BME280 program based on https://github.com/SWITCHSCIENCE/BME280/blob/master/Arduino/BME280_I2C/BME280_I2C.ino
-                  Float to series of bytes program based on http://forum.arduino.cc/index.php?topic=180456.0         
+                  Float to series of bytes program based on http://forum.arduino.cc/index.php?topic=180456.0    
+                  BME280 calculation based on http://akizukidenshi.com/download/ds/bosch/BST-BME280_DS001-10.pdf (p.23)
 */
 
 #include <BLE_API.h>
@@ -326,25 +327,38 @@ void loop() {
   Serial.println(" %");
 
   delay(1000);
-
-  signed long int tempData  = -1611;  // 1611   -> 0x0000064B, -1611 -> 0xFFFFF9B5
-  signed long int pressData = 101325; // 101325 -> 0x00018BCD
-  signed long int humData   = 4321;   // 4321   -> 0x000010E1
   
   byte byteArray[20] = {0x00};        // byte = uint8_t
-  
-  byteArray[0]  = (int)((tempData  >> 24) & 0xFF);
-  byteArray[1]  = (int)((tempData  >> 16) & 0xFF);
-  byteArray[2]  = (int)((tempData  >>  8) & 0xFF);
-  byteArray[3]  = (int)( tempData         & 0xFF);
-  byteArray[4]  = (int)((pressData >> 24) & 0xFF);
-  byteArray[5]  = (int)((pressData >> 16) & 0xFF);
-  byteArray[6]  = (int)((pressData >>  8) & 0xFF);
-  byteArray[7]  = (int)( pressData        & 0xFF);
-  byteArray[8]  = (int)((humData   >> 24) & 0xFF);
-  byteArray[9]  = (int)((humData   >> 16) & 0xFF);
-  byteArray[10] = (int)((humData  >>  8)  & 0xFF);
-  byteArray[11] = (int)( humData          & 0xFF);
+
+// 数値固定(デバッグ用)
+//  signed long int tempData  = -1611;  // 1611   -> 0x0000064B, -1611 -> 0xFFFFF9B5
+//  signed long int pressData = 101325; // 101325 -> 0x00018BCD
+//  signed long int humData   = 4321;   // 4321   -> 0x000010E1  
+//  byteArray[0]  = (int)((tempData  >> 24) & 0xFF);
+//  byteArray[1]  = (int)((tempData  >> 16) & 0xFF);
+//  byteArray[2]  = (int)((tempData  >>  8) & 0xFF);
+//  byteArray[3]  = (int)( tempData         & 0xFF);
+//  byteArray[4]  = (int)((pressData >> 24) & 0xFF);
+//  byteArray[5]  = (int)((pressData >> 16) & 0xFF);
+//  byteArray[6]  = (int)((pressData >>  8) & 0xFF);
+//  byteArray[7]  = (int)( pressData        & 0xFF);
+//  byteArray[8]  = (int)((humData   >> 24) & 0xFF);
+//  byteArray[9]  = (int)((humData   >> 16) & 0xFF);
+//  byteArray[10] = (int)((humData  >>  8)  & 0xFF);
+//  byteArray[11] = (int)( humData          & 0xFF);
+
+  byteArray[0]  = (int)((temp_cal  >> 24) & 0xFF);
+  byteArray[1]  = (int)((temp_cal  >> 16) & 0xFF);
+  byteArray[2]  = (int)((temp_cal  >>  8) & 0xFF);
+  byteArray[3]  = (int)( temp_cal         & 0xFF);
+  byteArray[4]  = (int)((press_cal >> 24) & 0xFF);
+  byteArray[5]  = (int)((press_cal >> 16) & 0xFF);
+  byteArray[6]  = (int)((press_cal >>  8) & 0xFF);
+  byteArray[7]  = (int)( press_cal        & 0xFF);
+  byteArray[8]  = (int)((hum_cal   >> 24) & 0xFF);
+  byteArray[9]  = (int)((hum_cal   >> 16) & 0xFF);
+  byteArray[10] = (int)((hum_cal  >>  8)  & 0xFF);
+  byteArray[11] = (int)( hum_cal          & 0xFF);
 
   ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る。
   ble.waitForEvent();
