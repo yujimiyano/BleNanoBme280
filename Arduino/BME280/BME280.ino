@@ -13,7 +13,7 @@
 #include <BLE_API.h>
 #include <Wire.h>
 
-#define DEVICE_NAME     "BLE_Peripheral"
+#define DEVICE_NAME     "CHAKUYOBAKO_0001"
 #define TXRX_BUF_LEN    20
 #define BME280_ADDRESS  0x76  // SD0->GNDなら0x76
 
