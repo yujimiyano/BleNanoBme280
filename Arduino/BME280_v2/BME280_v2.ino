@@ -13,11 +13,11 @@
                                                    and https://lowreal.net/2016/07/18/3
 */
 
-// #include <BLE_API.h>  // For v1.5 https://github.com/sandeepmistry/arduino-BLEPeripheral <-多分
-#include <nRF5x_BLE_API.h>  // For v2.0
+// #include <BLE_API.h>     // For v1.5 https://github.com/sandeepmistry/arduino-BLEPeripheral <-多分
+#include <nRF5x_BLE_API.h>  // For v2.0 https://github.com/redbear/nRF5x/blob/master/nRF52832/arduino/arduino-1.8.0/hardware/RBL/RBL_nRF52832/cores/RBL_nRF52832/FEATURE_BLE/nRF5x_BLE_API.h
 #include <Wire.h>
 
-#define DEVICE_NAME     "BLE_Peripheral"
+#define DEVICE_NAME     "CHAKUYOBAKO_0001"
 #define TXRX_BUF_LEN    20
 #define BME280_ADDRESS  0x76  // SD0->GNDなら0x76
 
@@ -293,7 +293,7 @@ void setup() {
   Serial.begin(9600);
   Serial.attach(uart_handle); // 割り込み処理
 
-  adc_init_setting(); // アナログ入力の基準電圧変更
+//  adc_init_setting(); // アナログ入力の基準電圧変更
   bme280setup();
 
   ble.init();
@@ -312,7 +312,8 @@ void setup() {
   ble.addService(uartService);
   ble.addService(BattService);  // バッテリー監視
   // set device name
-  ble.setDeviceName((const uint8_t *)"Simple Chat");
+//  ble.setDeviceName((const uint8_t *)"Simple Chat");
+  ble.setDeviceName((const uint8_t *)DEVICE_NAME);
   // set tx power,valid values are -40, -20, -16, -12, -8, -4, 0, 4
   ble.setTxPower(4);
   // set adv_interval, 100ms in multiples of 0.625ms.
@@ -393,21 +394,40 @@ void loop() {
   
 }
 
-void adc_init_setting()   // ADC setting
+// https://devzone.nordicsemi.com/question/49292/battery-service/
+static void battery_level_update(void)
 {
-    NRF_ADC->ENABLE = ADC_ENABLE_ENABLE_Enabled;
-    NRF_ADC->CONFIG =
-    (ADC_CONFIG_RES_10bit << ADC_CONFIG_RES_Pos) |
-    (ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos) |
-    (ADC_CONFIG_REFSEL_VBG << ADC_CONFIG_REFSEL_Pos) |
-    (ADC_CONFIG_EXTREFSEL_None << ADC_CONFIG_EXTREFSEL_Pos);
+        uint32_t err_code;
+        uint8_t  battery_level;
 
-//   NRF_ADC->CONFIG = (ADC_CONFIG_RES_10bit << ADC_CONFIG_RES_Pos) |
-//                      (ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos) |
-//                      (ADC_CONFIG_REFSEL_SupplyOneThirdPrescaling << ADC_CONFIG_REFSEL_Pos) |
-//                      (analogInputPin << ADC_CONFIG_PSEL_Pos) |
-
+        battery_level = (uint8_t)sensorsim_measure(&m_battery_sim_state, &m_battery_sim_cfg);
+        //set the condition for sending notification
+        err_code = ble_bas_battery_level_update(&m_bas, battery_level);
+        if ((err_code != NRF_SUCCESS) &&
+                (err_code != NRF_ERROR_INVALID_STATE) &&
+                (err_code != BLE_ERROR_NO_TX_BUFFERS) &&
+                (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+        )
+        {
+                APP_ERROR_HANDLER(err_code);
+        }
 }
+
+//void adc_init_setting()   // ADC setting
+//{
+//    NRF_ADC->ENABLE = ADC_ENABLE_ENABLE_Enabled;
+//    NRF_ADC->CONFIG =
+//    (ADC_CONFIG_RES_10bit << ADC_CONFIG_RES_Pos) |
+//    (ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos) |
+//    (ADC_CONFIG_REFSEL_VBG << ADC_CONFIG_REFSEL_Pos) |
+//    (ADC_CONFIG_EXTREFSEL_None << ADC_CONFIG_EXTREFSEL_Pos);
+//
+////   NRF_ADC->CONFIG = (ADC_CONFIG_RES_10bit << ADC_CONFIG_RES_Pos) |
+////                      (ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos) |
+////                      (ADC_CONFIG_REFSEL_SupplyOneThirdPrescaling << ADC_CONFIG_REFSEL_Pos) |
+////                      (analogInputPin << ADC_CONFIG_PSEL_Pos) |
+//
+//}
 
 //void tickerCallback(void)
 //{

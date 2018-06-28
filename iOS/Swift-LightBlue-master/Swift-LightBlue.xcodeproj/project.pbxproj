@@ -315,7 +315,7 @@
 				TargetAttributes = {
 					6CDD915B1C35964400DBC2E2 = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = H9Z7294LVH;
+						DevelopmentTeam = 85QBDK5443;
 						LastSwiftMigration = 0800;
 					};
 					6CDD916F1C35964400DBC2E2 = {
@@ -552,11 +552,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = H9Z7294LVH;
+				DEVELOPMENT_TEAM = 85QBDK5443;
 				INFOPLIST_FILE = "Swift-LightBlue/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.yujimiyano.Swift-LightBlue";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.emno.Swift-LightBlue";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Swift-LightBlue/Swift-LightBlue-Bridging-Header.h";
@@ -573,11 +573,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = H9Z7294LVH;
+				DEVELOPMENT_TEAM = 85QBDK5443;
 				INFOPLIST_FILE = "Swift-LightBlue/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.yujimiyano.Swift-LightBlue";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.emno.Swift-LightBlue";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Swift-LightBlue/Swift-LightBlue-Bridging-Header.h";
