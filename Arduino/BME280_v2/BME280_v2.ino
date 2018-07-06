@@ -340,34 +340,17 @@ void loop() {
   temp_act = (double)temp_cal / 100.0;
   press_act = (double)press_cal / 100.0;
   hum_act = (double)hum_cal / 1024.0;
-  Serial.print("TEMP : ");
-  Serial.print(temp_act);
-  Serial.print(" DegC  PRESS : ");
-  Serial.print(press_act);
-  Serial.print(" hPa  HUM : ");
-  Serial.print(hum_act);
-  Serial.println(" %");
+//  Serial.print("TEMP : ");
+//  Serial.print(temp_act);
+//  Serial.print(" DegC  PRESS : ");
+//  Serial.print(press_act);
+//  Serial.print(" hPa  HUM : ");
+//  Serial.print(hum_act);
+//  Serial.println(" %");
 
   delay(5000);
   
   byte byteArray[20] = {0x00};        // byte = uint8_t
-
-// 数値固定(デバッグ用)
-//  signed long int tempData  = -1611;  // 1611   -> 0x0000064B, -1611 -> 0xFFFFF9B5
-//  signed long int pressData = 101325; // 101325 -> 0x00018BCD
-//  signed long int humData   = 4321;   // 4321   -> 0x000010E1  
-//  byteArray[0]  = (int)((tempData  >> 24) & 0xFF);
-//  byteArray[1]  = (int)((tempData  >> 16) & 0xFF);
-//  byteArray[2]  = (int)((tempData  >>  8) & 0xFF);
-//  byteArray[3]  = (int)( tempData         & 0xFF);
-//  byteArray[4]  = (int)((pressData >> 24) & 0xFF);
-//  byteArray[5]  = (int)((pressData >> 16) & 0xFF);
-//  byteArray[6]  = (int)((pressData >>  8) & 0xFF);
-//  byteArray[7]  = (int)( pressData        & 0xFF);
-//  byteArray[8]  = (int)((humData   >> 24) & 0xFF);
-//  byteArray[9]  = (int)((humData   >> 16) & 0xFF);
-//  byteArray[10] = (int)((humData  >>  8)  & 0xFF);
-//  byteArray[11] = (int)( humData          & 0xFF);
 
   byteArray[0]  = (int)((temp_cal  >> 24) & 0xFF);
   byteArray[1]  = (int)((temp_cal  >> 16) & 0xFF);
@@ -385,9 +368,9 @@ void loop() {
   ble.updateCharacteristicValue(characteristic2.getValueAttribute().getHandle(), (byte *)byteArray, sizeof(byteArray));  // swift側でエラーが出る。
   
   batt = analogRead(A4) * 1.2 * 3;  // バッテリー電圧入力
-  Serial.print("  Battery Level : ");
-  Serial.print(batt);
-  Serial.println(" %");
+//  Serial.print("  Battery Level : ");
+//  Serial.print(batt);
+//  Serial.println(" %");
   ble.updateCharacteristicValue(battLevel.getValueAttribute().getHandle(), (byte *)batt, sizeof(batt));
  
   ble.waitForEvent();
