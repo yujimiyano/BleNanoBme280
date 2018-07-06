@@ -348,7 +348,7 @@ void loop() {
   Serial.print(hum_act);
   Serial.println(" %");
 
-  delay(1000);
+  delay(5000);
   
   byte byteArray[20] = {0x00};        // byte = uint8_t
 
@@ -395,23 +395,23 @@ void loop() {
 }
 
 // https://devzone.nordicsemi.com/question/49292/battery-service/
-static void battery_level_update(void)
-{
-        uint32_t err_code;
-        uint8_t  battery_level;
-
-        battery_level = (uint8_t)sensorsim_measure(&m_battery_sim_state, &m_battery_sim_cfg);
-        //set the condition for sending notification
-        err_code = ble_bas_battery_level_update(&m_bas, battery_level);
-        if ((err_code != NRF_SUCCESS) &&
-                (err_code != NRF_ERROR_INVALID_STATE) &&
-                (err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-                (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-        )
-        {
-                APP_ERROR_HANDLER(err_code);
-        }
-}
+//static void battery_level_update(void)
+//{
+//        uint32_t err_code;
+//        uint8_t  battery_level;
+//
+//        battery_level = (uint8_t)sensorsim_measure(&m_battery_sim_state, &m_battery_sim_cfg);
+//        //set the condition for sending notification
+//        err_code = ble_bas_battery_level_update(&m_bas, battery_level);
+//        if ((err_code != NRF_SUCCESS) &&
+//                (err_code != NRF_ERROR_INVALID_STATE) &&
+//                (err_code != BLE_ERROR_NO_TX_BUFFERS) &&
+//                (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+//        )
+//        {
+//                APP_ERROR_HANDLER(err_code);
+//        }
+//}
 
 //void adc_init_setting()   // ADC setting
 //{
